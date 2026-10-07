@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "c-client.h"
+
+static void utf8_stringlist (STRINGLIST *st,char *charset);
 
 /* Convert charset labelled stringlist to UTF-8 in place
  * Accepts: string list
