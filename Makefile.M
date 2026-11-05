@@ -24,9 +24,9 @@ OSDEP := c-client/osdep.c
 # use a slightly modified version of it
 LINKAGE=c-client/linkage_no_ssl.c
 
-# c-client cannot use a parallel make, so strip off any -j arguments to
-# environmental MAKE
-MAKE := $(shell echo $(MAKE) | sed "1,1s/-j *[0-9]*//g")
+# c-client Makefile cannot be used with parallel make as it relies on the
+# prerequisites of its targets being built in order, so always invoke it with
+# -j1 below to override the -j value inherited from the parent via MAKEFLAGS.
 
 LIBRARY := c-client/c-client.a
 
@@ -58,7 +58,7 @@ $(OSDEP):
 	done
 	@touch c-client/SPECIALS
 	@chmod +x c-client/drivers c-client/mkauths
-	@$(MAKE) -C c-client $(IMAP_OSTYPE) --no-print-directory \
+	@$(MAKE) -j1 -C c-client $(IMAP_OSTYPE) --no-print-directory \
 		MAKE="$(MAKE)" CC="$(CC)" \
 		SSLTYPE="$(IMAP_SSLTYPE)" \
 		EXTRACFLAGS="$(IMAP_CFLAGS) -fPIC"
@@ -66,7 +66,7 @@ $(OSDEP):
 # subsequent make call, only call c-client's Makefile if it looks
 # like there's something to do
 $(LIBRARY): $(OSDEP) $(wildcard c-client/*.c) $(wildcard c-client/*.h)
-	@$(MAKE) -C c-client --no-print-directory MAKE="$(MAKE)"
+	@$(MAKE) -j1 -C c-client --no-print-directory MAKE="$(MAKE)"
 
 # we don't want to call ssl_onceonlyinit() from linkage.c, instead we do it
 # ourselves later (the first time SSL is needed)
